@@ -209,7 +209,8 @@ OPENROUTER_API_KEY                # optional alternative for enrichment/optimiza
 
 ## Demo
 
-- Live demo link (Loom, YouTube, etc.) or local instructions: Run the local FastAPI service, open `http://localhost:8000/`, log in with the admin key, then show the Search, Ingest, Sources, Activity, Access, and MCP sections. For the hosted demo, use [https://citadel-archive.onrender.com](https://citadel-archive.onrender.com) with a role-scoped token. Source code is at [https://github.com/Hrishikesh332/Citadel-Archive](https://github.com/Hrishikesh332/Citadel-Archive).
+- Demo video: [https://youtu.be/wgMGPM7yVJM](https://youtu.be/wgMGPM7yVJM)
+- Live demo / local instructions: Run the local FastAPI service, open `http://localhost:8000/`, log in with the admin key, then show the Search, Ingest, Sources, Activity, Access, and MCP sections. For the hosted demo, use [https://citadel-archive.onrender.com](https://citadel-archive.onrender.com) with a role-scoped token. Source code is at [https://github.com/Hrishikesh332/Citadel-Archive](https://github.com/Hrishikesh332/Citadel-Archive).
 - 3-minute pitch outline:
 
 ```text
@@ -235,6 +236,7 @@ OPENROUTER_API_KEY                # optional alternative for enrichment/optimiza
 ## Links
 
 - Repo: [https://github.com/Hrishikesh332/Citadel-Archive](https://github.com/Hrishikesh332/Citadel-Archive)
+- Demo video: [https://youtu.be/wgMGPM7yVJM](https://youtu.be/wgMGPM7yVJM)
 - Hosted deployed URL: [https://citadel-archive.onrender.com](https://citadel-archive.onrender.com)
 - Agent discovery manifest: [https://citadel-archive.onrender.com/.well-known/citadel.json](https://citadel-archive.onrender.com/.well-known/citadel.json)
 - Hosted skills: [https://citadel-archive.onrender.com/skills](https://citadel-archive.onrender.com/skills)
