@@ -119,15 +119,17 @@ You will have **3 minutes** to stand out:
 
 ## Schedule
 
+All times **Central European Time (CET)**.
+
 | Time | What |
 |------|------|
-| 12:00 PM | Doors open + networking |
-| 12:30 PM | Opening remarks + Cognee Cloud walkthrough |
-| 1:00 PM | Hacking begins |
-| 4:30 PM | Project submission deadline — finalists selected |
-| 5:00 PM | Finalist presentations & judging |
-| 5:30 PM | Awards ceremony |
-| 6:00 PM | Event wrap-up & doors close |
+| 5:00 PM | Doors open + networking |
+| 5:30 PM | Opening remarks + Cognee Cloud walkthrough |
+| 6:00 PM | Hacking begins |
+| 9:00 PM | Project submission deadline — finalists selected |
+| 9:15 PM | Finalist presentations & judging |
+| 9:45 PM | Awards ceremony |
+| 10:00 PM | Event wrap-up & doors close |
 
 ## Setup
 
