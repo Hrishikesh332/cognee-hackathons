@@ -358,24 +358,25 @@ have several skills (an ingestor, an answerer, a linter, a critic).
 
 ```python
 import asyncio
-from uuid import UUID
 
 import cognee
 from cognee import SearchType
 from cognee.memory import SkillRunEntry
 from cognee.modules.engine.operations.setup import setup
-from cognee.modules.memify.skill_improvement import improve_skill
-from cognee.modules.pipelines.layers.resolve_authorized_user_datasets import (
-    resolve_authorized_user_datasets,
-)
 
 DATASET = "company-brain"
 SESSION = "brain-session-1"
 
 
+def result_items(result):
+    if isinstance(result, dict):
+        return result.get("items", [])
+    return getattr(result, "items", [])
+
+
 async def main():
     # Connect to your managed Cognee Cloud instance (mandatory).
-    await cognee.serve(url="https://your-instance.cognee.ai", api_key="ck_...")
+    await cognee.serve(url="http://127.0.0.1:8000")
 
     # Fresh slate — drop these two prune calls if you want to keep prior runs.
     await cognee.prune.prune_data()
@@ -384,28 +385,33 @@ async def main():
 
     # 1. Ingest skills into the graph.
     remembered = await cognee.remember(
-        "./my_skills",
+        "./cognee-cloud-hackathon-2026-06-19/my_skills",
         dataset_name=DATASET,
         content_type="skills",
     )
-    dataset_id = UUID(remembered.dataset_id)
-    user, datasets = await resolve_authorized_user_datasets(dataset_id)
-    dataset = datasets[0]
+    print("skill ingest:", remembered)
+    remembered_items = result_items(remembered)
+    print("skill items:", remembered_items)
+    skill_names = [item["name"] for item in remembered_items if item.get("kind") == "skill"]
+    if not skill_names:
+        raise RuntimeError("No skills were ingested into the target dataset.")
+    skill_to_improve = skill_names[0]
+    print("resolved skill name:", skill_to_improve)
 
     # 2. Run the agent against the skills. session_id keeps working memory in
     #    the Cloud session tier. Ask the agent to return a JSON score.
     answer = await cognee.search(
         "Answer: how is retention calculated? Return JSON with a score 0..1.",
         query_type=SearchType.AGENTIC_COMPLETION,
-        datasets=DATASET,
-        skills=["qa-answerer"],
+        datasets=[DATASET],
+        skills=[skill_to_improve],
         max_iter=6,
         session_id=SESSION,
     )
+    print("answer:", answer)
 
     # 3. Score the run. In real life: parse `answer`, run an eval, etc.
     score = 0.3
-    skill_to_improve = "qa-answerer"
 
     # 4. Record feedback. apply=False -> propose a rewrite, don't change the
     #    skill yet. score_threshold sets when a proposal is generated.
@@ -425,20 +431,19 @@ async def main():
             "score_threshold": 0.9,
         },
     )
+    print("proposal_result:", proposal_result)
+    proposal_items = result_items(proposal_result)
+    print("proposal items:", proposal_items)
 
-    # 5. Apply the proposal explicitly.
     proposal_id = next(
-        item["proposal_id"]
-        for item in proposal_result.items
-        if item.get("kind") == "skill_improvement_proposal"
+        (
+            item["proposal_id"]
+            for item in proposal_items
+            if item.get("kind") == "skill_improvement_proposal"
+        ),
+        None,
     )
-    await improve_skill(
-        skill_to_improve,
-        dataset=dataset,
-        user=user,
-        proposal_id=proposal_id,
-        apply=True,
-    )
+    print("proposal_id:", proposal_id)
 
 
 asyncio.run(main())
@@ -454,8 +459,8 @@ What the knobs do:
 - **`score_threshold`** (in `skill_improvement`) — only generate a proposal
   when the run score falls *below* this value. Raise it to be aggressive
   about improvement; lower it to only react to clear failures.
-- **`apply=False`** — propose without rewriting. Inspect the diff, then call
-  `improve_skill(..., apply=True)` to actually update the skill.
+- **`apply=False`** — propose without rewriting. This example stops after
+  returning the `proposal_id`; explicit apply is still a separate follow-up.
 
 Current local/backend caveats:
 
