@@ -457,6 +457,25 @@ What the knobs do:
 - **`apply=False`** — propose without rewriting. Inspect the diff, then call
   `improve_skill(..., apply=True)` to actually update the skill.
 
+Current local/backend caveats:
+
+- **Served `remember()` result shape** — when testing against the local
+  backend via `cognee.serve(url="http://127.0.0.1:8000")`, `remember()` may
+  currently come back as a plain `dict` instead of a `RememberResult`
+  instance. If you need `items`, read them defensively from either
+  `result["items"]` or `result.items`.
+- **Served skill names** — the current served upload/materialization path may
+  canonicalize uploaded skills to names like `skill-0000` instead of
+  preserving the source directory name such as `qa-answerer`. When testing
+  against the local backend, prefer reading the ingested skill name from
+  `remembered.items` and using that value for `search(...)` and
+  `SkillRunEntry(...)`.
+- **Served search/apply flow** — remote search currently expects
+  `datasets=[DATASET]` rather than a bare string, and the explicit
+  `improve_skill(..., apply=True)` step is still a separate follow-up after
+  proposal generation. A minimal served-mode smoke test can stop after
+  printing the returned `proposal_id`.
+
 A full multi-skill version of this loop (three cooperating skills, JSON
 parsing, before/after skill bodies) lives in the cognee repo at
 [`examples/demos/skill_feedback_loop/skill_feedback_loop_demo.py`](https://github.com/topoteretes/cognee/tree/main/examples/demos/skill_feedback_loop).
