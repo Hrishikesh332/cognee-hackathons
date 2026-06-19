@@ -223,6 +223,62 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+### 5. Push a local brain to Cognee Cloud
+
+Prefer to build locally first? Develop against a local cognee instance, then
+**push** your finished brain up to the Cognee Cloud instance we gave you —
+either path satisfies the "runs on Cognee Cloud" requirement.
+
+`cognee.push(...)` composes *export + upload*: it exports the dataset as a
+portable COGX archive, uploads it to your Cloud instance, and imports it there.
+With the default `mode="preserve"` your locally-built graph lands in the Cloud
+as-is, with **zero LLM calls on the remote side** (so it's fast and cheap).
+
+```python
+import cognee
+
+# Authenticate against your Cloud instance once (credentials handed out at kickoff).
+# Auth is reused from the serve stack: live connection -> ~/.cognee/cloud_credentials.json
+# -> env vars. Run `cognee-cli serve` once and you can push any time after.
+await cognee.serve(url="https://your-instance.cognee.ai", api_key="ck_...")
+
+# Push a local dataset up to the Cloud (remote dataset defaults to the same name).
+await cognee.push("company-brain")
+
+# Rename the remote dataset and upload without blocking.
+await cognee.push(
+    "company-brain",
+    target_dataset="prod",
+    run_in_background=True,   # poll result.pipeline_run_id for status
+)
+```
+
+`mode` controls how the remote side treats the upload:
+
+- **`preserve`** (default) — import your locally-extracted graph as-is, no
+  remote LLM calls.
+- **`hybrid`** / **`re-derive`** — let the remote side enrich or rebuild the
+  graph from the imported data instead of taking it verbatim.
+
+`cognee.export(...)` is the building block `push()` reuses. It writes a portable
+archive (`cogx` / `json` / `graphml` / `cypher` / `pydantic`) to **local disk**
+without touching the Cloud — handy for backups or inspecting what would upload:
+
+```python
+await cognee.export("company-brain", format="cogx")  # -> portable file on disk
+```
+
+CLI equivalent of the push flow:
+
+```bash
+cognee-cli serve              # authenticate against your Cloud instance once
+cognee-cli push company-brain # export + upload + import
+```
+
+> **Version note:** `push` / `export` require a recent cognee build. If
+> `cognee.push` isn't available in your environment, grab the latest cognee at
+> kickoff — we'll make sure the event build has it.
+
 ### CLI
 
 The same operations are exposed as a CLI:
@@ -408,6 +464,7 @@ parsing, before/after skill bodies) lives in the cognee repo at
 | What | How | When to use |
 |------|-----|-------------|
 | Cognee Cloud | `await cognee.serve(url=..., api_key=...)` | **Mandatory** — your Company Brain's home for the event |
+| Push to Cloud | `await cognee.push("dataset")` | Upload a locally-built brain to your Cloud instance |
 | Python SDK | `import cognee` | Building your brain / agent logic |
 | CLI | `cognee-cli remember / recall / forget` | Smoke-tests, ad-hoc ingestion |
 | Local UI | `cognee-cli -ui` → http://localhost:3000 | Inspecting the graph visually |
