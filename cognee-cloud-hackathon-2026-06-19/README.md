@@ -153,8 +153,11 @@ All times **Central European Time (CET)**.
 
 ```bash
 uv venv && source .venv/bin/activate
-uv pip install cognee
+uv pip install cognee==1.2.0.dev1
 ```
+
+> Use the **`1.2.0.dev1`** prerelease for this hackathon — it's the version the
+> Cognee Cloud APIs (`cognee.serve` / `remember` / `recall`) are built against.
 
 ### 2. Configure the LLM
 
@@ -305,7 +308,7 @@ server** on your own machine — the same `remember` / `recall` / `forget` /
 `improve` API plus a graph explorer UI, all hosted locally:
 
 ```bash
-uv pip install cognee     # if you haven't already
+uv pip install cognee==1.2.0.dev1   # if you haven't already
 cognee-cli -ui            # starts the local cognee server + web UI at http://localhost:3000
 ```
 
@@ -377,7 +380,7 @@ have several skills (an ingestor, an answerer, a linter, a critic).
 
 ### Run the loop from Python
 
-> **Install first:** `uv pip install cognee` (see [Setup](#setup)). The imports
+> **Install first:** `uv pip install cognee==1.2.0.dev1` (see [Setup](#setup)). The imports
 > below ship with cognee — no extra packages needed.
 
 ```python
