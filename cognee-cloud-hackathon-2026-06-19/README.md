@@ -391,10 +391,6 @@ import cognee
 from cognee import SearchType
 from cognee.memory import SkillRunEntry
 from cognee.modules.engine.operations.setup import setup
-from cognee.modules.memify.skill_improvement import improve_skill
-from cognee.modules.pipelines.layers.resolve_authorized_user_datasets import (
-    resolve_authorized_user_datasets,
-)
 
 DATASET = "company-brain"
 SESSION = "brain-session-1"
@@ -455,6 +451,9 @@ async def build_locally():
             "score_threshold": 0.9,
         },
     )
+    print("proposal_result:", proposal_result)
+    proposal_items = result_items(proposal_result)
+    print("proposal items:", proposal_items)
 
     # 5. Apply the proposal explicitly (skip gracefully if none was generated).
     proposal_id = next(
@@ -476,6 +475,7 @@ async def build_locally():
         proposal_id=proposal_id,
         apply=True,
     )
+    print("proposal_id:", proposal_id)
 
 
 async def push_to_cloud():
@@ -513,8 +513,27 @@ What the knobs do:
 - **`score_threshold`** (in `skill_improvement`) — only generate a proposal
   when the run score falls *below* this value. Raise it to be aggressive
   about improvement; lower it to only react to clear failures.
-- **`apply=False`** — propose without rewriting. Inspect the diff, then call
-  `improve_skill(..., apply=True)` to actually update the skill.
+- **`apply=False`** — propose without rewriting. This example stops after
+  returning the `proposal_id`; explicit apply is still a separate follow-up.
+
+Current local/backend caveats:
+
+- **Served `remember()` result shape** — when testing against the local
+  backend via `cognee.serve(url="http://127.0.0.1:8000")`, `remember()` may
+  currently come back as a plain `dict` instead of a `RememberResult`
+  instance. If you need `items`, read them defensively from either
+  `result["items"]` or `result.items`.
+- **Served skill names** — the current served upload/materialization path may
+  canonicalize uploaded skills to names like `skill-0000` instead of
+  preserving the source directory name such as `qa-answerer`. When testing
+  against the local backend, prefer reading the ingested skill name from
+  `remembered.items` and using that value for `search(...)` and
+  `SkillRunEntry(...)`.
+- **Served search/apply flow** — remote search currently expects
+  `datasets=[DATASET]` rather than a bare string, and the explicit
+  `improve_skill(..., apply=True)` step is still a separate follow-up after
+  proposal generation. A minimal served-mode smoke test can stop after
+  printing the returned `proposal_id`.
 
 A full multi-skill version of this loop (three cooperating skills, JSON
 parsing, before/after skill bodies) lives in the cognee repo at
